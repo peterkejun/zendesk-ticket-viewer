@@ -1,0 +1,5 @@
+creds/**/*
+node_modules
+build
+dev
+src/creds
