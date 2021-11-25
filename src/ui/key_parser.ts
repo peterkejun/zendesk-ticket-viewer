@@ -20,8 +20,8 @@ export default class KeyParser {
         ];
     }
 
-    public parse(key: Buffer): string | SpecialKey {
-        const utf8 = key.toString('utf-8');
+    public parse(key: Buffer | string): string | SpecialKey {
+        const utf8 = typeof key === 'string' ? key : key.toString('utf-8');
         const special_key = this.special_keys.find(ak => ak === utf8);
         if (special_key) {
             return special_key;

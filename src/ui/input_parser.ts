@@ -107,6 +107,7 @@ export default class InputParser {
     private rule_tree: InputRuleTree;
     private is_paused: boolean;
     private key_parser: KeyParser;
+    private stdin: readline.Interface;
 
     constructor() {
         this.input = new Subject();
@@ -117,37 +118,39 @@ export default class InputParser {
 
         this.key_parser = new KeyParser();
 
-        process.stdin.setRawMode(true);
-        process.stdin.on('data', key => {
-            const input = this.key_parser.parse(key);
-
-            if (input === SpecialKey.CTRL_C) {
-                process.exit(0);
-            }
-
-            if (this.is_paused) {
-                return;
-            }
-
-            let input_type: InputType | null = null;
-            try {
-                input_type = this.rule_tree.navigate(input);
-            } catch (err) {
-                this.input.next({
-                    err,
-                    input_type: InputType.INVALID_INPUT,
-                    last_input: input,
-                });
-                return;
-            }
-
-            if (input_type != null) {
-                this.input.next({
-                    input_type,
-                    last_input: input,
-                });
-            }
+        this.stdin = readline.createInterface({
+            input: process.stdin,
+        });
+        this.stdin.on('line', line => {
+            const _line = line.trim();
+            const input = this.key_parser.parse(_line);
+            this.handle_input(input);
         })
+    }
+
+    private handle_input(input: string) {
+        if (this.is_paused) {
+            return;
+        }
+
+        let input_type: InputType | null = null;
+        try {
+            input_type = this.rule_tree.navigate(input);
+        } catch (err) {
+            this.input.next({
+                err,
+                input_type: InputType.INVALID_INPUT,
+                last_input: input,
+            });
+            return;
+        }
+
+        if (input_type != null) {
+            this.input.next({
+                input_type,
+                last_input: input,
+            });
+        }
     }
 
     private get_input_rules(): InputRule {
