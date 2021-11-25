@@ -34,13 +34,6 @@ export interface IViewTicketsResponseData extends IPaginatedResponseData {
 }
 
 
-export interface IListTicketsReturnData extends IObject {
-    tickets: ITicket[],
-    current_page: number,
-    total_pages: number,
-    total_tickets: number,
-}
-
 export interface IColumn extends IObject {
     field: string,
     display: string,

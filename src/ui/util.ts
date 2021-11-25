@@ -13,5 +13,8 @@ export const pad_string = (str: string, char_limit: number, padding: number = 0)
     }
     padded += make_whitespace(char_limit - padded.length);
     return padded;
+}
 
+export const is_numeric = (str: string): boolean => {
+    return !isNaN(+str);
 }
