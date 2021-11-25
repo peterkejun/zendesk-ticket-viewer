@@ -2,12 +2,24 @@ import { Subject } from 'rxjs';
 import readline from 'readline';
 import * as _ from 'lodash';
 import { is_numeric } from './util';
+import KeyParser, { SpecialKey } from './key_parser';
+import { exit } from 'process';
 
 export enum InputType {
-    VIEW_ALL_TICKETS = 1,
-    VIEW_SINGLE_TICKET = 2,
-    QUIT = 3,
-    INVALID_INPUT = 4,
+    VIEW_ALL_TICKETS = 'View all tickets',
+    VIEW_SINGLE_TICKET = 'View a single ticket',
+    QUIT = 'Quit',
+    INVALID_INPUT = '__invalid_input__',
+
+    NEXT_PAGE = 'Next page',
+    PREVIOUS_PAGE = 'Previous page',
+
+}
+
+export interface IInputEvent {
+    input_type: InputType,
+    last_input: string,
+    err?: any,
 }
 
 export class InputRuleNode {
@@ -91,10 +103,10 @@ export class InputRuleTree {
 
 export default class InputParser {
 
-    private input: Subject<InputType>;
-    private stdin_interface: readline.Interface;
+    private input: Subject<IInputEvent>;
     private rule_tree: InputRuleTree;
     private is_paused: boolean;
+    private key_parser: KeyParser;
 
     constructor() {
         this.input = new Subject();
@@ -103,30 +115,37 @@ export default class InputParser {
 
         this.rule_tree = new InputRuleTree(this.get_input_rules());
 
-        this.stdin_interface = readline.createInterface({
-            input: process.stdin,
-        });
+        this.key_parser = new KeyParser();
 
-        this.stdin_interface.on('line', line => {
+        process.stdin.setRawMode(true);
+        process.stdin.on('data', key => {
+            const input = this.key_parser.parse(key);
+
+            if (input === SpecialKey.CTRL_C) {
+                process.exit(0);
+            }
+
             if (this.is_paused) {
                 return;
             }
 
-            const _line = line.trim();
             let input_type: InputType | null = null;
             try {
-                input_type = this.rule_tree.navigate(_line);
+                input_type = this.rule_tree.navigate(input);
             } catch (err) {
-                this.input.error({
+                this.input.next({
                     err,
                     input_type: InputType.INVALID_INPUT,
-                    current_input: _line,
+                    last_input: input,
                 });
                 return;
             }
 
             if (input_type != null) {
-                this.input.next(input_type);
+                this.input.next({
+                    input_type,
+                    last_input: input,
+                });
             }
         })
     }
@@ -138,6 +157,8 @@ export default class InputParser {
                 '#': InputType.VIEW_SINGLE_TICKET,
             },
             '3': InputType.QUIT,
+            [SpecialKey.LEFT]: InputType.PREVIOUS_PAGE,
+            [SpecialKey.RIGHT]: InputType.NEXT_PAGE,
         };
     }
 
