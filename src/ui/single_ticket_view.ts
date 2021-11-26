@@ -65,7 +65,7 @@ export default class SingleTicketView {
             char_length: 15,
         }, {
             field: 'tags',
-            display: 'Tag',
+            display: 'Tags',
             char_length: 15,
         }]
     }

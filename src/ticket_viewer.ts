@@ -1,14 +1,14 @@
 import InputParser from "./ui/input_parser";
 import SingleTicketView from "./ui/single_ticket_view";
 import TicketList from "./ui/ticket_list";
-import { InputType, IInputEvent, IInputHandler, ViewerMode } from './types';
+import { IInputType, IInputEvent, IInputHandler, ViewerMode } from './types';
 
 
 export default class TicketViewer {
     private input_parser: InputParser;
     private ticket_list: TicketList;
     private single_ticket_view: SingleTicketView | null;
-    private input_handler_map: Map<InputType, IInputHandler>;
+    private input_handler_map: Map<IInputType, IInputHandler>;
     private mode: ViewerMode;
 
     constructor() {
@@ -18,12 +18,12 @@ export default class TicketViewer {
         this.single_ticket_view = null;
 
         this.input_handler_map = new Map();
-        this.input_handler_map.set(InputType.VIEW_ALL_TICKETS, this.view_all_tickets);
-        this.input_handler_map.set(InputType.NEXT_PAGE, this.go_to_next_page);
-        this.input_handler_map.set(InputType.PREVIOUS_PAGE, this.go_to_previous_page);
-        this.input_handler_map.set(InputType.VIEW_SINGLE_TICKET, this.view_single_ticket);
-        this.input_handler_map.set(InputType.MENU, this.view_menu);
-        this.input_handler_map.set(InputType.QUIT, this.quit);
+        this.input_handler_map.set(IInputType.VIEW_ALL_TICKETS, this.view_all_tickets);
+        this.input_handler_map.set(IInputType.NEXT_PAGE, this.go_to_next_page);
+        this.input_handler_map.set(IInputType.PREVIOUS_PAGE, this.go_to_previous_page);
+        this.input_handler_map.set(IInputType.VIEW_SINGLE_TICKET, this.view_single_ticket);
+        this.input_handler_map.set(IInputType.MENU, this.view_menu);
+        this.input_handler_map.set(IInputType.QUIT, this.quit);
     }
 
     start() {

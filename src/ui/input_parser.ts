@@ -3,14 +3,14 @@ import readline from 'readline';
 import * as _ from 'lodash';
 import { is_numeric } from './util';
 import KeyParser from './key_parser';
-import { IInputEvent, IInputOption, InputType, SpecialKey } from '../types';
+import { IInputEvent, IInputOption, IInputType, SpecialKey } from '../types';
 
 
 
 export class InputRuleNode {
     private children_map: Map<string, InputRuleNode>;
-    private input_type: InputType | null;
-    constructor(children_map: Map<string, InputRuleNode>, type: InputType | null = null) {
+    private input_type: IInputType | null;
+    constructor(children_map: Map<string, InputRuleNode>, type: IInputType | null = null) {
         this.children_map = children_map;
         this.input_type = type;
     }
@@ -35,12 +35,12 @@ export class InputRuleNode {
         return this.input_type != null;
     }
 
-    public get_type(): InputType {
+    public get_type(): IInputType {
         return this.input_type!;
     }
 }
 
-type InputRule = InputType | { [key: string]: InputRule };
+type InputRule = IInputType | { [key: string]: InputRule };
 
 export class InputRuleTree {
     private input_rule: InputRule;
@@ -56,7 +56,7 @@ export class InputRuleTree {
     private build_tree(input_rule: InputRule): InputRuleNode {
         const is_base_type = !(_.isObject(input_rule));
         if (is_base_type) {
-            const base_type = input_rule as InputType;
+            const base_type = input_rule as IInputType;
             return new InputRuleNode(new Map(), base_type);
         } else {
             const child_map = new Map<string, InputRuleNode>();
@@ -70,7 +70,7 @@ export class InputRuleTree {
         }
     }
 
-    public navigate(input: string): InputType | null {
+    public navigate(input: string): IInputType | null {
         const child = this.current_node.get_child(input);
         if (!child) {
             throw new Error("CHILD_DNE");
@@ -94,7 +94,7 @@ export default class InputParser {
     private key_parser: KeyParser;
     private stdin: readline.Interface;
 
-    private input_type_display_map: Map<InputType, string>;
+    private input_type_display_map: Map<IInputType, string>;
 
     constructor() {
         this.input = new Subject();
@@ -136,14 +136,14 @@ export default class InputParser {
     }
 
     private handle_input = (input: string) => {
-        let input_type: InputType | null = null;
+        let input_type: IInputType | null = null;
 
         try {
             input_type = this.rule_tree.navigate(input);
         } catch (err) {
             this.input.next({
                 err,
-                input_type: InputType.INVALID_INPUT,
+                input_type: IInputType.INVALID_INPUT,
                 last_input: input,
             });
             return;
@@ -159,14 +159,14 @@ export default class InputParser {
 
     private get_input_rules(): InputRule {
         return {
-            '1': InputType.VIEW_ALL_TICKETS,
+            '1': IInputType.VIEW_ALL_TICKETS,
             '2': {
-                '#': InputType.VIEW_SINGLE_TICKET,
+                '#': IInputType.VIEW_SINGLE_TICKET,
             },
-            'quit': InputType.QUIT,
-            [SpecialKey.LEFT]: InputType.PREVIOUS_PAGE,
-            [SpecialKey.RIGHT]: InputType.NEXT_PAGE,
-            'menu': InputType.MENU,
+            'quit': IInputType.QUIT,
+            [SpecialKey.LEFT]: IInputType.PREVIOUS_PAGE,
+            [SpecialKey.RIGHT]: IInputType.NEXT_PAGE,
+            'menu': IInputType.MENU,
         };
     }
 
@@ -182,14 +182,14 @@ export default class InputParser {
         return this.input;
     }
 
-    private get_input_types(): InputType[] {
+    private get_input_types(): IInputType[] {
         return [
-            InputType.MENU,
-            InputType.VIEW_ALL_TICKETS,
-            InputType.VIEW_SINGLE_TICKET,
-            InputType.NEXT_PAGE,
-            InputType.PREVIOUS_PAGE,
-            InputType.QUIT,
+            IInputType.MENU,
+            IInputType.VIEW_ALL_TICKETS,
+            IInputType.VIEW_SINGLE_TICKET,
+            IInputType.NEXT_PAGE,
+            IInputType.PREVIOUS_PAGE,
+            IInputType.QUIT,
         ]
     }
 
@@ -211,11 +211,11 @@ export default class InputParser {
     }
 
     private init_input_type_display_map() {
-        this.input_type_display_map.set(InputType.VIEW_ALL_TICKETS, 'view all tickets');
-        this.input_type_display_map.set(InputType.VIEW_SINGLE_TICKET, 'view a single ticket');
-        this.input_type_display_map.set(InputType.NEXT_PAGE, 'go to the next page');
-        this.input_type_display_map.set(InputType.PREVIOUS_PAGE, 'go to the previous page');
-        this.input_type_display_map.set(InputType.QUIT, 'quit');
-        this.input_type_display_map.set(InputType.MENU, 'view the menu');
+        this.input_type_display_map.set(IInputType.VIEW_ALL_TICKETS, 'view all tickets');
+        this.input_type_display_map.set(IInputType.VIEW_SINGLE_TICKET, 'view a single ticket');
+        this.input_type_display_map.set(IInputType.NEXT_PAGE, 'go to the next page');
+        this.input_type_display_map.set(IInputType.PREVIOUS_PAGE, 'go to the previous page');
+        this.input_type_display_map.set(IInputType.QUIT, 'quit');
+        this.input_type_display_map.set(IInputType.MENU, 'view the menu');
     }
 }

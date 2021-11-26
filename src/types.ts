@@ -18,7 +18,6 @@ export interface ITicket extends IObject {
     priority: string,
     status: string,
     tags: ITag[],
-    [key: string]: any,
 }
 
 // API
@@ -52,7 +51,7 @@ export interface IColumn extends IObject {
 
 // Input
 
-export enum InputType {
+export enum IInputType {
     MENU = 'menu',
     QUIT = 'quit',
 
@@ -65,7 +64,7 @@ export enum InputType {
 
 }
 export interface IInputEvent {
-    input_type: InputType,
+    input_type: IInputType,
     last_input: string,
     err?: any,
 }
@@ -81,7 +80,7 @@ export enum SpecialKey {
 }
 
 export interface IInputOption {
-    type: InputType,
+    type: IInputType,
     display: string,
     key_option: string,
 }
