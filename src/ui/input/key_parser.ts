@@ -1,4 +1,4 @@
-import { SpecialKey } from "../types";
+import { SpecialKey } from "../../types";
 
 
 export default class KeyParser {

@@ -1,93 +1,13 @@
 import { Subject } from 'rxjs';
 import readline from 'readline';
-import * as _ from 'lodash';
-import { is_numeric } from './util';
 import KeyParser from './key_parser';
-import { IInputEvent, IInputOption, IInputType, SpecialKey } from '../types';
+import { IInputEvent, IInputOption, IInputType, IInputRule } from '../../types';
+import { InputRuleTree } from './input_rule_tree';
 
-
-
-export class InputRuleNode {
-    private children_map: Map<string, InputRuleNode>;
-    private input_type: IInputType | null;
-    constructor(children_map: Map<string, InputRuleNode>, type: IInputType | null = null) {
-        this.children_map = children_map;
-        this.input_type = type;
-    }
-
-    public get_child(input: string): InputRuleNode | null {
-        let child = this.children_map.get(input);
-        if (child != null) {
-            return child;
-        }
-
-        if (is_numeric(input)) {
-            child = this.children_map.get('#');
-            if (child != null) {
-                return child;
-            }
-        }
-
-        return null;
-    }
-
-    public is_type_node(): boolean {
-        return this.input_type != null;
-    }
-
-    public get_type(): IInputType {
-        return this.input_type!;
-    }
-}
-
-type InputRule = IInputType | { [key: string]: InputRule };
-
-export class InputRuleTree {
-    private input_rule: InputRule;
-    private current_node: InputRuleNode;
-    private root: InputRuleNode;
-
-    constructor(input_rule: InputRule) {
-        this.input_rule = input_rule;
-        this.root = this.build_tree(this.input_rule);
-        this.current_node = this.root;
-    }
-
-    private build_tree(input_rule: InputRule): InputRuleNode {
-        const is_base_type = !(_.isObject(input_rule));
-        if (is_base_type) {
-            const base_type = input_rule as IInputType;
-            return new InputRuleNode(new Map(), base_type);
-        } else {
-            const child_map = new Map<string, InputRuleNode>();
-            const child_rules = Object.entries(input_rule);
-            for (let [key, rule] of child_rules) {
-                const child_node = this.build_tree(rule);
-                child_map.set(key, child_node);
-            }
-            const node = new InputRuleNode(child_map);
-            return node;
-        }
-    }
-
-    public navigate(input: string): IInputType | null {
-        const child = this.current_node.get_child(input);
-        if (!child) {
-            throw new Error("CHILD_DNE");
-        }
-        if (child.is_type_node()) {
-            const type = child.get_type();
-            this.current_node = this.root;
-            return type;
-        } else {
-            this.current_node = child;
-            return null;
-        }
-    }
-}
 
 export default class InputParser {
 
+    private input_rule: IInputRule;
     private input: Subject<IInputEvent>;
     private rule_tree: InputRuleTree;
     private is_paused: boolean;
@@ -96,12 +16,14 @@ export default class InputParser {
 
     private input_type_display_map: Map<IInputType, string>;
 
-    constructor() {
+    constructor(input_rule: IInputRule) {
+        this.input_rule = input_rule;
+
         this.input = new Subject();
 
         this.is_paused = false;
 
-        this.rule_tree = new InputRuleTree(this.get_input_rules());
+        this.rule_tree = new InputRuleTree(this.input_rule);
 
         this.key_parser = new KeyParser();
 
@@ -155,19 +77,6 @@ export default class InputParser {
                 last_input: input,
             });
         }
-    }
-
-    private get_input_rules(): InputRule {
-        return {
-            '1': IInputType.VIEW_ALL_TICKETS,
-            '2': {
-                '#': IInputType.VIEW_SINGLE_TICKET,
-            },
-            'quit': IInputType.QUIT,
-            [SpecialKey.LEFT]: IInputType.PREVIOUS_PAGE,
-            [SpecialKey.RIGHT]: IInputType.NEXT_PAGE,
-            'menu': IInputType.MENU,
-        };
     }
 
     public pause_input() {

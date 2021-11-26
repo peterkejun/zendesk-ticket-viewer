@@ -69,6 +69,13 @@ export interface IInputEvent {
     err?: any,
 }
 
+export type IInputRuleCallback = () => void;
+
+export type IInputRule = IInputType | {
+    callback?: IInputRuleCallback,
+    children: { [key: string]: IInputRule, }
+};
+
 export type IInputHandler = (input: IInputEvent) => void | Promise<void>;
 
 export enum SpecialKey {
@@ -92,5 +99,7 @@ export enum ViewerMode {
     MENU,
     LIST,
     SINGLE,
+    LOADING,
+    QUITTING,
 }
 
