@@ -1,19 +1,37 @@
 import { view_ticket } from "../api/view_ticket";
-import { ITicket, IColumn } from "../types";
+import { ITicket, IColumn, IErrorResponse } from "../types";
 import { pad_string } from "./util";
 
 const CELL_PADDING = 5;
+
 export default class SingleTicketView {
     private ticket_id: number;
     private ticket: ITicket | null;
 
+    private error: string | null;
+
     constructor(ticket_id: number) {
         this.ticket_id = ticket_id;
         this.ticket = null;
+        this.error = null;
     }
 
     public async fetch_current_ticket() {
-        this.ticket = await view_ticket(this.ticket_id);
+        try {
+            this.ticket = await view_ticket(this.ticket_id);
+            this.error = null;
+        } catch (err: any) {
+            const err_res = err.response as IErrorResponse;
+            this.ticket = null;
+            switch (err_res.status) {
+                case 404:
+                    this.error = 'Ticket not found';
+                    break;
+                default:
+                    this.error = 'Something went wrong. Please try again later.';
+                    break;
+            }
+        }
     }
 
     private get_column_definitions(): IColumn[] {
@@ -53,11 +71,15 @@ export default class SingleTicketView {
     }
 
     public render() {
+        if (this.error) {
+            return this.error;
+        }
+
         if (this.ticket == null) {
             return '';
         }
 
-        const char_limits = [20, 20];
+        const char_limits = [20, -1];
 
         const columns = this.get_column_definitions();
 
@@ -71,6 +93,8 @@ export default class SingleTicketView {
             const row_str = field + value;
             rows.push(row_str);
         }
+        rows.push('Description');
+        rows.push(this.ticket.description);
         return rows.join('\n');
     }
 }

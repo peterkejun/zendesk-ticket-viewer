@@ -2,25 +2,10 @@ import { Subject } from 'rxjs';
 import readline from 'readline';
 import * as _ from 'lodash';
 import { is_numeric } from './util';
-import KeyParser, { SpecialKey } from './key_parser';
-import { exit } from 'process';
+import KeyParser from './key_parser';
+import { IInputEvent, IInputOption, InputType, SpecialKey } from '../types';
 
-export enum InputType {
-    VIEW_ALL_TICKETS = 'View all tickets',
-    VIEW_SINGLE_TICKET = 'View a single ticket',
-    QUIT = 'Quit',
-    INVALID_INPUT = '__invalid_input__',
 
-    NEXT_PAGE = 'Next page',
-    PREVIOUS_PAGE = 'Previous page',
-
-}
-
-export interface IInputEvent {
-    input_type: InputType,
-    last_input: string,
-    err?: any,
-}
 
 export class InputRuleNode {
     private children_map: Map<string, InputRuleNode>;
@@ -109,10 +94,12 @@ export default class InputParser {
     private key_parser: KeyParser;
     private stdin: readline.Interface;
 
+    private input_type_display_map: Map<InputType, string>;
+
     constructor() {
         this.input = new Subject();
 
-        this.is_paused = true;
+        this.is_paused = false;
 
         this.rule_tree = new InputRuleTree(this.get_input_rules());
 
@@ -121,19 +108,36 @@ export default class InputParser {
         this.stdin = readline.createInterface({
             input: process.stdin,
         });
-        this.stdin.on('line', line => {
-            const _line = line.trim();
-            const input = this.key_parser.parse(_line);
-            this.handle_input(input);
-        })
+
+        this.input_type_display_map = new Map();
+        this.init_input_type_display_map();
     }
 
-    private handle_input(input: string) {
+    public start_reading_stdin() {
+        this.stdin.on('line', this.stdin_listener);
+
+        this.input_type_display_map = new Map();
+        this.init_input_type_display_map();
+    }
+
+    public stop_reading_stdin() {
+        this.stdin.removeListener('line', this.stdin_listener);
+        this.stdin.close();
+    }
+
+    private stdin_listener = (line: string) => {
         if (this.is_paused) {
             return;
         }
 
+        const _line = line.trim();
+        const input = this.key_parser.parse(_line);
+        this.handle_input(input);
+    }
+
+    private handle_input = (input: string) => {
         let input_type: InputType | null = null;
+
         try {
             input_type = this.rule_tree.navigate(input);
         } catch (err) {
@@ -159,9 +163,10 @@ export default class InputParser {
             '2': {
                 '#': InputType.VIEW_SINGLE_TICKET,
             },
-            '3': InputType.QUIT,
+            'quit': InputType.QUIT,
             [SpecialKey.LEFT]: InputType.PREVIOUS_PAGE,
             [SpecialKey.RIGHT]: InputType.NEXT_PAGE,
+            'menu': InputType.MENU,
         };
     }
 
@@ -175,5 +180,42 @@ export default class InputParser {
 
     public sub() {
         return this.input;
+    }
+
+    private get_input_types(): InputType[] {
+        return [
+            InputType.MENU,
+            InputType.VIEW_ALL_TICKETS,
+            InputType.VIEW_SINGLE_TICKET,
+            InputType.NEXT_PAGE,
+            InputType.PREVIOUS_PAGE,
+            InputType.QUIT,
+        ]
+    }
+
+    public get_input_options(): IInputOption[] {
+        const input_types = this.get_input_types();
+
+        const options: IInputOption[] = []
+        for (let type of input_types) {
+            const display = this.input_type_display_map.get(type);
+            if (display != null) {
+                options.push({
+                    type,
+                    display,
+                    key_option: type.toString(),
+                });
+            }
+        }
+        return options;
+    }
+
+    private init_input_type_display_map() {
+        this.input_type_display_map.set(InputType.VIEW_ALL_TICKETS, 'view all tickets');
+        this.input_type_display_map.set(InputType.VIEW_SINGLE_TICKET, 'view a single ticket');
+        this.input_type_display_map.set(InputType.NEXT_PAGE, 'go to the next page');
+        this.input_type_display_map.set(InputType.PREVIOUS_PAGE, 'go to the previous page');
+        this.input_type_display_map.set(InputType.QUIT, 'quit');
+        this.input_type_display_map.set(InputType.MENU, 'view the menu');
     }
 }

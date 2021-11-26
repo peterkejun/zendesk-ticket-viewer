@@ -1,15 +1,9 @@
-import InputParser, { IInputEvent, InputType } from "./ui/input_parser";
+import InputParser from "./ui/input_parser";
 import SingleTicketView from "./ui/single_ticket_view";
 import TicketList from "./ui/ticket_list";
+import { InputType, IInputEvent, IInputHandler, ViewerMode } from './types';
 
 
-type IInputHandler = (input: IInputEvent) => Promise<void>;
-
-enum ViewerMode {
-    MENU,
-    LIST,
-    SINGLE,
-}
 export default class TicketViewer {
     private input_parser: InputParser;
     private ticket_list: TicketList;
@@ -18,7 +12,7 @@ export default class TicketViewer {
     private mode: ViewerMode;
 
     constructor() {
-        this.mode = ViewerMode.MENU;
+        this.mode = ViewerMode.LANDING;
         this.input_parser = new InputParser();
         this.ticket_list = new TicketList();
         this.single_ticket_view = null;
@@ -28,6 +22,8 @@ export default class TicketViewer {
         this.input_handler_map.set(InputType.NEXT_PAGE, this.go_to_next_page);
         this.input_handler_map.set(InputType.PREVIOUS_PAGE, this.go_to_previous_page);
         this.input_handler_map.set(InputType.VIEW_SINGLE_TICKET, this.view_single_ticket);
+        this.input_handler_map.set(InputType.MENU, this.view_menu);
+        this.input_handler_map.set(InputType.QUIT, this.quit);
     }
 
     start() {
@@ -35,7 +31,8 @@ export default class TicketViewer {
             next: this.handle_input,
             error: this.handle_input_error,
         });
-        this.input_parser.resume_input();
+        this.input_parser.start_reading_stdin();
+        this.render();
     }
 
     private handle_input = async (input: IInputEvent) => {
@@ -77,6 +74,38 @@ export default class TicketViewer {
         this.render();
     }
 
+    private view_menu = (input: IInputEvent) => {
+        this.mode = ViewerMode.MENU;
+        this.render();
+    }
+
+    private quit = (input: IInputEvent) => {
+        this.input_parser.stop_reading_stdin();
+    }
+
+    private make_landing_view(): string {
+        const landing = `
+Welcome to the Ticket Viewer!
+Type 'menu' to view options or 'quit' to quit.
+        `;
+        return landing;
+    }
+
+    private make_menu_view(): string {
+        const menu_strings: string[] = [];
+        menu_strings.push(`Select view options:\n`);
+
+        const options = this.input_parser.get_input_options();
+        for (let option of options) {
+            const option_str = `* Type ${option.key_option} to ${option.display}`;
+            menu_strings.push(option_str);
+        }
+        menu_strings.push('\n')
+
+        const menu = menu_strings.join('\n');
+        return menu;
+    }
+
     private render() {
         let view: string;
         switch (this.mode) {
@@ -90,8 +119,11 @@ export default class TicketViewer {
                     view = '';
                 }
                 break;
+            case ViewerMode.MENU:
+                view = this.make_menu_view();
+                break;
             default:
-                view = '';
+                view = this.make_landing_view();
                 break;
         }
         console.log(view);

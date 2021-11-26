@@ -7,6 +7,10 @@ export const make_whitespace = (count: number): string => {
 }
 
 export const pad_string = (str: string, char_limit: number, padding: number = 0): string => {
+    if (char_limit <= 0) {
+        return str;
+    }
+
     let padded = str;
     if (padded.length > char_limit - padding) {
         padded = padded.substring(0, char_limit - padding - 3) + '...';

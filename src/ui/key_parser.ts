@@ -1,10 +1,5 @@
-export enum SpecialKey {
-    UP = "\u001b[A",
-    DOWN = "\u001b[B",
-    RIGHT = "\u001b[C",
-    LEFT = "\u001b[D",
-    CTRL_C = "\u0003",
-}
+import { SpecialKey } from "../types";
+
 
 export default class KeyParser {
 

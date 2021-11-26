@@ -1,4 +1,4 @@
-import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import Axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { domain, email, api_token } from '../creds/api_token.json';
 
 const get_auth_header = (): string => {
