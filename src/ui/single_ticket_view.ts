@@ -4,18 +4,37 @@ import { pad_string } from "./util";
 
 const CELL_PADDING = 5;
 
+/**
+ * A model for the application, fetches and renders a single ticket
+ */
 export default class SingleTicketView {
+    /**
+     * the ticket id
+     */
     private ticket_id: number;
+
+    /**
+     * the ticket object
+     */
     private ticket: ITicket | null;
 
+    /**
+     * any error while loading the ticket
+     */
     private error: string | null;
 
+    /**
+     * @param ticket_id ticket id of this view
+     */
     constructor(ticket_id: number) {
         this.ticket_id = ticket_id;
         this.ticket = null;
         this.error = null;
     }
 
+    /**
+     * Fetch the ticket from API
+     */
     public async fetch_current_ticket() {
         try {
             this.ticket = await view_ticket(this.ticket_id);
@@ -34,6 +53,10 @@ export default class SingleTicketView {
         }
     }
 
+    /**
+     * @returns column definition for displaying ticket details
+     * @see IColumn
+     */
     private get_column_definitions(): IColumn[] {
         return [{
             field: 'id',
@@ -70,19 +93,27 @@ export default class SingleTicketView {
         }]
     }
 
-    public render() {
+    /**
+     * Renders a string that displays ticket ticket in a tabular fashion
+     * @returns rendered string of ticket details
+     */
+    public render(): string {
+        // if an error occured, display the error
         if (this.error) {
             return this.error;
         }
 
+        // if no ticket exists, display nothing
         if (this.ticket == null) {
             return '';
         }
 
+        // -1 because we don't want to limit the length of the value column
         const char_limits = [20, -1];
 
         const columns = this.get_column_definitions();
 
+        // render one row per field
         const rows: string[] = [];
         for (let column of columns) {
             const field = pad_string(column.display, char_limits[0], CELL_PADDING);
@@ -93,8 +124,11 @@ export default class SingleTicketView {
             const row_str = field + value;
             rows.push(row_str);
         }
+
+        // render ticket description in a paragraph
         rows.push('Description');
         rows.push(this.ticket.description);
+
         return rows.join('\n');
     }
 }

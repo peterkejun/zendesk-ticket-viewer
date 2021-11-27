@@ -1,3 +1,13 @@
+/**
+ * This file contains typings and enums for the entire project. 
+ * 
+ * There are 4 sections,
+ * - Ticket (from Zendesk API)
+ * - API
+ * - UI
+ * - Controller (TicketViewer class)
+ */
+
 // Ticket
 
 export type ITag = string;
@@ -21,6 +31,11 @@ export interface ITicket extends IObject {
 }
 
 // API
+
+export enum ROUTE {
+    LIST_TICKETS,
+    VIEW_TICKET,
+};
 
 export interface IPaginatedResponseData extends IObject {
     next_page: number | null,
@@ -48,8 +63,6 @@ export interface IColumn extends IObject {
     display: string,
     char_length: number,
 }
-
-// Input
 
 export enum IInputType {
     MENU = 'menu',
@@ -83,7 +96,6 @@ export enum SpecialKey {
     DOWN = "\u001b[B",
     RIGHT = "\u001b[C",
     LEFT = "\u001b[D",
-    CTRL_C = "\u0003",
 }
 
 export interface IInputOption {
