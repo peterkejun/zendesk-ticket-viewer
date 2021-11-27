@@ -94,7 +94,7 @@ export default class SingleTicketView {
     }
 
     /**
-     * Renders a string that displays ticket ticket in a tabular fashion
+     * Renders a string that displays ticket in a tabular fashion
      * @returns rendered string of ticket details
      */
     public render(): string {
