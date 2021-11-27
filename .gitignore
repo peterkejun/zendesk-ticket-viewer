@@ -1,5 +1,4 @@
-creds/**/*
+src/creds/api_token.json
 node_modules
 build
 dev
-src/creds

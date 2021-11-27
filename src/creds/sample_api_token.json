@@ -1,0 +1,5 @@
+{
+    "domain": "https://<domain>.zendesk.com",
+    "email": "example@zendesk.com",
+    "api_token": "YOUR_API_TOKEN"
+}
