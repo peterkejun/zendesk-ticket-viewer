@@ -22,7 +22,7 @@ export const make_whitespace = (count: number): string => {
  */
 export const pad_string = (str: string, char_limit: number, padding: number = 0): string => {
     if (char_limit <= 0) {
-        return str;
+        return '';
     }
 
     let padded = str;
