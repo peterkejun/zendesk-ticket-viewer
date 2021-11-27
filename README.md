@@ -10,6 +10,11 @@ Use [npm](https://docs.npmjs.com/about-npm) to install modules used for this pro
 npm i
 ```
 
+## Authentication
+
+In order to authenticate,
+1. Replace the values in `src/creds/sample_api_token.json` with your Zendesk domain, email and API token.
+2. Rename the file from `sample_api_token.json` to `api_token.json`.
 ## Usage
 There are 6 commands, type them followed by a newline in the command line to trigger. 
 
