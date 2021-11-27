@@ -44,7 +44,7 @@ export default class InputParser {
      * stdin reader from "readline" module
      * @see https://www.npmjs.com/package/readline
      */
-    private stdin: readline.Interface;
+    private stdin: readline.Interface | null;
 
     /**
      * static map to store human-readable labels for input types
@@ -65,11 +65,9 @@ export default class InputParser {
         this.key_parser = new KeyParser();
 
         // start reading stdin on init
-        // this is important because it keeps the event loop going
         this.is_paused = false;
-        this.stdin = readline.createInterface({
-            input: process.stdin,
-        });
+
+        this.stdin = null;
 
         // initailize static label mapping
         this.input_type_display_map = new Map();
@@ -81,6 +79,10 @@ export default class InputParser {
      */
     public start_reading_stdin() {
         // attach listener for inputs delimited by newline
+        // this is important because it keeps the event loop going
+        this.stdin = readline.createInterface({
+            input: process.stdin,
+        });
         this.stdin.on('line', this.stdin_listener);
     }
 
@@ -89,11 +91,13 @@ export default class InputParser {
      * call this to remove the input parser from the next interation of the event loop
      */
     public stop_reading_stdin() {
-        // remove listener 
-        this.stdin.removeListener('line', this.stdin_listener);
+        if (this.stdin) {
+            // remove listener 
+            this.stdin.removeListener('line', this.stdin_listener);
 
-        // close the stdin stream
-        this.stdin.close();
+            // close the stdin stream
+            this.stdin.close();
+        }
     }
 
     /**
