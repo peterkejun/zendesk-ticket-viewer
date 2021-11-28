@@ -25,5 +25,12 @@ There are 6 commands, type them followed by a newline in the command line to tri
 - `left arrow`: View the previous page in the list.
 - `quit`: Quit the application.
 
+# Unit Tests
+Unit test cases are created for all public interfaces. To run unit tests,
+
+```hash
+npm test
+```
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
