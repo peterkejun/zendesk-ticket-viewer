@@ -105,7 +105,7 @@ export default class SingleTicketView {
 
         // if no ticket exists, display nothing
         if (this.ticket == null) {
-            return '';
+            return 'Something went wrong. Please try again later.';
         }
 
         // -1 because we don't want to limit the length of the value column

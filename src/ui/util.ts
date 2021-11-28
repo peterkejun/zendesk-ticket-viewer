@@ -21,8 +21,11 @@ export const make_whitespace = (count: number): string => {
  * @returns a string of length "char_limit" padded by whitespace
  */
 export const pad_string = (str: string, char_limit: number, padding: number = 0): string => {
-    if (char_limit <= 0) {
+    if (char_limit === 0) {
         return '';
+    }
+    if (char_limit < 0) {
+        return str;
     }
 
     let padded = str;
