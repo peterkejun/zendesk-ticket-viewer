@@ -27,7 +27,9 @@ Description
 Sample description`;
 
 export const sample_ticket_row_rendered: string =
-    `ID             Subject                       Date Created                  Priority            Status              
+    `Showing 1 of 1 pages (10 tickets)
+
+ID             Subject                       Date Created                  Priority            Status              
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
@@ -37,4 +39,6 @@ export const sample_ticket_row_rendered: string =
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
 1              Sample subject                2021-11-28T02:44:49Z          normal              open                
-1              Sample subject                2021-11-28T02:44:49Z          normal              open                `;
+1              Sample subject                2021-11-28T02:44:49Z          normal              open                
+
+Use left/right arrow keys to view the previous/next page.`;

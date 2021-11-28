@@ -157,22 +157,30 @@ export default class TicketList {
             return this.error;
         }
 
-        const columns = this.get_column_definitions();
+        const rows: string[] = [];
+
+        const pagination = `Showing ${this.current_page} of ${this.total_pages} pages (${this.total_tickets} tickets)\n`;
+        rows.push(pagination);
 
         // render header row
+        const columns = this.get_column_definitions();
         const header_row = columns.map(column => {
             return pad_string(column.display, column.char_length, CELL_PADDING);
         }).join('');
+        rows.push(header_row)
 
         // render each row
-        const rows: string[] = [];
         for (let ticket of this.tickets) {
             const row_string = this.render_row(columns, ticket);
             rows.push(row_string);
         }
 
+        // render instructions
+        const instructions = `\nUse left/right arrow keys to view the previous/next page.`
+        rows.push(instructions);
+
         // concatenate all rows by newline 
-        const table_string = header_row + '\n' + rows.join('\n');
+        const table_string = rows.join('\n');
         return table_string;
     }
 }

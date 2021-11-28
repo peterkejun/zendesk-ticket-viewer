@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import TicketList from '../../src/ui/ticket_list';
 import { sample_ticket, sample_ticket_row_rendered } from '../test_data';
 import * as api from '../../src/api/list_tickets';
+import { ITicket } from '../../src/types';
 
 chai.use(chai_as_promised);
 const expect = chai.expect;
@@ -19,11 +20,12 @@ const create_error_stub = (error_code: number = -1) => sinon.stub(api, 'list_tic
 
 const create_success_stub = () => sinon.stub(api, 'list_tickets')
     .returns(new Promise((resolve) => {
+        const tickets: ITicket[] = Array(10).fill(sample_ticket);
         resolve({
             next_page: null,
             previous_page: null,
-            count: 1,
-            tickets: Array(10).fill(sample_ticket),
+            count: tickets.length,
+            tickets,
         });
     }));
 

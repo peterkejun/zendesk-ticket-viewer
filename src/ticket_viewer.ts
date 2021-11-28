@@ -50,6 +50,7 @@ export default class TicketViewer {
         this.input_handler_map.set(IInputType.VIEW_SINGLE_TICKET, this.view_single_ticket);
         this.input_handler_map.set(IInputType.MENU, this.view_menu);
         this.input_handler_map.set(IInputType.QUIT, this.quit);
+        this.input_handler_map.set(IInputType.INVALID_INPUT, this.handle_invalid_input);
     }
 
     /**
@@ -78,6 +79,7 @@ export default class TicketViewer {
         if (handler) {
             handler(input);
         } else {
+            console.log(input.input_type);
             console.error('No handler for input event');
         }
     }
@@ -86,7 +88,15 @@ export default class TicketViewer {
      * @param error any error that occured during input recognition
      */
     private handle_input_error = (error: any) => {
-        console.log('something went wrong');
+        console.log('Something went wrong. Please try again later.');
+        this.mode = ViewerMode.MENU;
+        this.render();
+    }
+
+    private handle_invalid_input = (event: IInputEvent) => {
+        console.log(`${event.last_input} is not a valid input.\n`);
+        this.mode = ViewerMode.MENU;
+        this.render();
     }
 
     /**
