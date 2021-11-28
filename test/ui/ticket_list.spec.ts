@@ -27,7 +27,7 @@ const create_success_stub = () => sinon.stub(api, 'list_tickets')
         });
     }));
 
-describe.only('TicketList', () => {
+describe('TicketList', () => {
     const view = new TicketList();
 
     describe('#fetch_current_page()', () => {
