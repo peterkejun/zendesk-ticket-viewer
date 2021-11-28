@@ -31,12 +31,18 @@ export default class TicketList {
     private tickets: ITicket[] = [];
 
     /**
+     * any error while loading the ticket
+     */
+    private error: string | null;
+
+    /**
      * Set page to first page
      */
     constructor() {
         this.current_page = 1;
         this.total_pages = 1;
         this.total_tickets = 0;
+        this.error = null;
     }
 
     /**
@@ -76,16 +82,21 @@ export default class TicketList {
     /**
      * fetch current page of tickets and update pagination parameters
      */
-    async fetch_current_page() {
-        const data = await list_tickets(this.current_page);
-        this.tickets = data.tickets;
+    public async fetch_current_page() {
+        try {
+            const data = await list_tickets(this.current_page);
+            this.tickets = data.tickets;
 
-        this.total_tickets = data.count;
+            this.total_tickets = data.count;
 
-        // if there are multiple pages, then calculate total number of pages
-        if (this.total_tickets > data.tickets.length) {
-            this.total_pages = Math.ceil(this.total_tickets / data.tickets.length);
+            // if there are multiple pages, then calculate total number of pages
+            if (this.total_tickets > data.tickets.length) {
+                this.total_pages = Math.ceil(this.total_tickets / data.tickets.length);
+            }
+        } catch (err) {
+            this.error = 'Something went wrong. Please try again later.';
         }
+
     }
 
     /**
@@ -142,6 +153,10 @@ export default class TicketList {
      * @returns rendered table string of all tickets
      */
     public render() {
+        if (this.error) {
+            return this.error;
+        }
+
         const columns = this.get_column_definitions();
 
         // render header row
